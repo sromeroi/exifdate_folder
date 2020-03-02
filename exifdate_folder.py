@@ -5,8 +5,7 @@
 #
 # Author: Santiago Romero - Jan-2020
 #
-# TODO: Ask for confirmation before starting process.
-# TODO: If output file exists, append suffix.
+# TODO: support globs
 
 import os
 import sys
@@ -29,16 +28,19 @@ possible_raw_extensions = [ "ORF", "RAW" ]
 #------------------------------------------------------------------------------
 def info():
     '''Display info about the purpose of the program.'''
-    msg = ("\nExifdate_folder: Convert all images filenames to YYYYMMDD_HHMMSS"
+    msg = ("\nExifdate_folder: Rename images filenames to YYYYMMDD_HHMMSS"
            " (from EXIF).")
     print(msg)
 
 #------------------------------------------------------------------------------
 def usage(exit_status):
     '''Show command line usage.'''
-    msg = ('Usage: exifdate_folder.py foldername\n\n'
-           'Renames all the image files with filenames: YYYYMMDD_HHMMSS.ext.\n'
-           'Matching RAW/ORF files it will follow the renaming of the matching image.\n'
+    msg = ('\nUsage:     $ python exifdate_folder.py foldername\n'
+           '           $ python exifdate_folder.py filename\n\n'
+           'Renames image file specified or inside folder as YYYYMMDD_HHMMSS.ext.\n'
+           'Matching RAW/ORF files it will follow the renaming of the matching image.\n\n'
+           'Examples:  $ python exifdate_folder.py .\n'
+           '           $ python exifdate_folder.py IMG_1234.JPG\n'
     )
     print(msg)
     sys.exit(exit_status)
@@ -109,6 +111,11 @@ def renameImgToExif( filename, folder, fullpath, orig_base_path, abs_base_path )
     file_extension = file_extension.lower()
     new_filename = "{0}{1}".format(os.path.join(folder, filedate), file_extension)
 
+    suffix = 0;
+    while os.path.exists(new_filename) or os.path.isdir(new_filename):
+        suffix += 1
+        new_filename = "{0}_{1}{2}".format(os.path.join(folder, filedate), suffix, file_extension)
+
     # At this point, examples for "tag", "exifdate", "filedate":
     # "Image DateTime", "2020:02:16 13:19:03", "20200216_131903"
     try:
@@ -132,7 +139,15 @@ def renameImgToExif( filename, folder, fullpath, orig_base_path, abs_base_path )
     if raw_file is not None:
         raw_filename_wo_ext, raw_file_extension = os.path.splitext(raw_file)
         raw_file_extension = raw_file_extension.lower()
-        new_raw_filename = "{0}{1}".format(os.path.join(folder, filedate), raw_file_extension)
+
+        if suffix == 0:
+            new_raw_filename = "{0}{1}".format(os.path.join(folder, filedate), raw_file_extension)
+        else:
+            new_raw_filename = "{0}_{1}{2}".format(os.path.join(folder, filedate), suffix, raw_file_extension)
+
+        while os.path.exists(new_raw_filename) or os.path.isdir(new_raw_filename):
+            suffix += 1
+            new_raw_filename = "{0}_{1}{2}".format(os.path.join(folder, filedate), suffix, raw_file_extension)
 
         try:
             os.rename(raw_file, new_raw_filename)
@@ -183,17 +198,34 @@ def main():
     if len(sys.argv) < 2:
         usage(1)
 
-    ok = confirm("\nProcess selected folder and rename all images into it? (y/n): ")
+    param = sys.argv[1]
+
+    # Build list of images...
+    ok = False
+    filelist = []
+
+    # Process folder:
+    if os.path.isdir(param):
+        ok = confirm("\nProcess selected folder and rename all images into it? (y/n): ")
+        if ok:
+            orig_path = param
+            walk_dir = os.path.abspath(param)
+            filelist = buildFileList(walk_dir, image_pattern)
+
+    # Process single file:
+    elif os.path.isfile(param):
+        if not image_pattern.match(param):
+            print("\n- Specified file is not an image file. Aborting...")
+            sys.exit(2)
+        ok = confirm("\nProcess selected file and rename it after its EXIF date? (y/n): ")
+        if ok:
+            orig_path = os.path.dirname(param)
+            walk_dir = os.path.abspath(param)
+            filelist.append( [param, orig_path, walk_dir] )
+
     if not ok:
         print("Aborting...")
         sys.exit(0)
-
-    walk_dir = sys.argv[1]
-    orig_path = walk_dir
-    walk_dir = os.path.abspath(walk_dir)
-
-    # Build list of images...
-    filelist = buildFileList(walk_dir, image_pattern)
 
     if len(filelist) == 0:
         print("- No images found.")
