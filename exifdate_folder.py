@@ -13,9 +13,9 @@ import re
 import exifread
 import datetime
 
-image_pattern = re.compile(".*\.(jpe?g|png|gif)$", re.IGNORECASE)
-exifdate_pattern = re.compile("^\d{4}:\d{2}:\d{2} \d{2}:\d{2}:\d{2}$", re.IGNORECASE)
-output_pattern = re.compile("^\d{4}\d{2}\d{2}_\d{2}\d{2}\d{2}\.\w+$", re.IGNORECASE)
+image_pattern = re.compile(r".*\.(jpe?g|png|gif)$", re.IGNORECASE)
+exifdate_pattern = re.compile(r"^\d{4}:\d{2}:\d{2} \d{2}:\d{2}:\d{2}$", re.IGNORECASE)
+output_pattern = re.compile(r"^\d{4}\d{2}\d{2}_\d{2}\d{2}\d{2}\.\w+$", re.IGNORECASE)
 
 date_tags = [
     'EXIF DateTimeOriginal',
@@ -52,11 +52,12 @@ def buildFileList(walk_dir, pattern):
 
     filelist = []
 
+    #pylint: disable=unused-variable
     for folder, subdirs, files in os.walk(walk_dir):
         for filename in files:
             fullpath = os.path.join(folder, filename)
             if pattern.match(filename):
-                filelist.append( [filename, folder, fullpath ] );
+                filelist.append( [filename, folder, fullpath ] )
     return filelist
 
 
@@ -111,7 +112,7 @@ def renameImgToExif( filename, folder, fullpath, orig_base_path, abs_base_path )
     file_extension = file_extension.lower()
     new_filename = "{0}{1}".format(os.path.join(folder, filedate), file_extension)
 
-    suffix = 0;
+    suffix = 0
     while os.path.exists(new_filename) or os.path.isdir(new_filename):
         suffix += 1
         new_filename = "{0}_{1}{2}".format(os.path.join(folder, filedate), suffix, file_extension)
@@ -137,6 +138,7 @@ def renameImgToExif( filename, folder, fullpath, orig_base_path, abs_base_path )
 
     # We found a RAW file matching the Image, rename it
     if raw_file is not None:
+        #pylint: disable=unused-variable
         raw_filename_wo_ext, raw_file_extension = os.path.splitext(raw_file)
         raw_file_extension = raw_file_extension.lower()
 
@@ -187,8 +189,13 @@ def confirm(message="OK to push to continue [Y/N]? "):
     Ask user to enter Y or N (case-insensitive).
     """
     answer = ""
+    if sys.version_info[:2] <= (2, 7):
+        #pylint: disable=undefined-variable
+        get_input = raw_input
+    else:
+        get_input = input
     while answer not in ["y", "n"]:
-        answer = raw_input(message).lower()
+        answer = get_input(message).lower()
     return answer == "y"
 
 #------------------------------------------------------------------------------
