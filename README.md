@@ -17,7 +17,7 @@ Just clone the repository. The program is a small and simple standalone script t
 You can easily convert all the images in a directory and its subdirectories. Just move into the folder containing the image/images and run:
 
 ```
-# python exifdate_folder.py .
+$ python exifdate_folder.py .
 ```
 
 Files will be renamed, like in the following example:
@@ -41,7 +41,7 @@ In the example above, `P2161180.JPG` was converted to `20200216_125002.jpg` so `
 You can also convert a single image file:
 
 ```
-# python exifdate_folder.py P2161162.JPG
+$ python exifdate_folder.py P2161162.JPG
 ```
 
 In case output file exists, a suffix will be appended to the filename (eg: _1, _2...).
@@ -54,7 +54,7 @@ In case output file exists, a suffix will be appended to the filename (eg: _1, _
 
 ## Authors
 
-* **Santiago Romero** - *Initial work* - [sromeroi](https://github.com/sromeroi)
+* **Santiago Romero** - *Created the script* - [sromeroi](https://github.com/sromeroi)
 
 ## License
 
