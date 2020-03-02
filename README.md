@@ -1,6 +1,6 @@
 # Exifdate_folder
 
-Rename all the image files in a directory ("folder") and subdirectories after its EXIF date (output filename: YYYYMMDD_HHMMSS.jpg).
+Rename all the image files in a directory ("folder") and subdirectories (or a single image file) after its EXIF date (output filename: YYYYMMDD_HHMMSS.jpg).
 
 I wrote this small script because Olympus digital and most phones store its camera images with filenames like IMG_XXXX.jpg or DCIM_XXXX.jpg. 
 
@@ -37,6 +37,14 @@ $ python /path/to/exifdate_folder.py .
 I usually shoot fotos in both JPG+RAW, so if the folder has any RAW image (.raw or .orf), it will be renamed matching its image file.
 
 In the example above, `P2161180.JPG` was converted to `20200216_125002.jpg` so `P2161180.ORF` will be converted to `20200216_125002.orf` too.
+
+You can also convert a single image file:
+
+```
+# python exifdate_folder.py P2161162.JPG
+```
+
+In case output file exists, a suffix will be appended to the filename (eg: _1, _2...).
 
 ## Built With
 
