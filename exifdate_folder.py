@@ -193,6 +193,7 @@ def confirm(message="OK to push to continue [Y/N]? "):
         #pylint: disable=undefined-variable
         get_input = raw_input
     else:
+        #pylint: disable=undefined-variable
         get_input = input
     while answer not in ["y", "n"]:
         answer = get_input(message).lower()
